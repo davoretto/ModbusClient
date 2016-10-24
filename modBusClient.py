@@ -26,10 +26,9 @@ class Form(QtGui.QDialog, modBusGui_4v2.Ui_MainWindow):
         """ Initialize the GUI """
 
         # FIXME: requestBtn gets called on returnPressed event in any lineEdit object
+        # Fixed on 2016-10-23: Creating an instance of a dummy QtGui.QpushButton object before the button_request
+        #     creation in the modBusGui_4v2.py seems to fix the problem with unexpected signals from button_request.
         self.button_request.pressed.connect(self.readHoldingRegisters)
-        """ 2016-10-23: Creating an instance of a dummy QtGui.QpushButton object before the button_request
-            creation in the modBusGui_4v2.py seems to fix the problem with unexpected signals from button_request.
-        """
 
         # self.checkBox_Connected.clicked.connect(self.connectToServer) #TODO: figure out
 
