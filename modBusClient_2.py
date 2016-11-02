@@ -189,7 +189,7 @@ class ModbusClient():
         """
         try:
             self.modbusConn = ModbusTcpClient(host = self.serverIpAddr, port = self.port)
-            print "connectServer executed"  #TODO: remove
+            # print "connectServer executed"  #TODO: remove
         except Exception:
             print "Could not connect to a modbus server."
 
