@@ -7,31 +7,39 @@ author: Davor Afric
 last edited: October 2016
 """
 
-import sys, modBusGui_5
+import sys, modBusGui_6
 from PyQt4 import QtCore, QtGui
 from pymodbus.client.sync import ModbusTcpClient
 
 
-class Form(QtGui.QDialog, modBusGui_5.Ui_MainWindow):
-
+class Window(QtGui.QMainWindow, modBusGui_6.Ui_MainWindow):
+    """ GUI class
+    """
     def __init__(self, parent=None):
-        super(Form, self).__init__(parent)
+        super(self.__class__, self).__init__(parent)
         self.client = ModbusClient()
         self.setupUi(self)
-        # self.button_dummy = QtGui.QPushButton(self.centralwidget)
         self.initUi()
 
 
     def initUi(self):
-        """ Initialize the GUI """
+        """ Initialize the GUI
+        """
 
+        """ Push buttons
+        """
         # FIXME: requestBtn gets called on returnPressed event in any lineEdit object
         # Fixed on 2016-10-23: Creating an instance of a dummy QtGui.QpushButton object before the button_request
         #     creation in the modBusGui_4v2.py seems to fix the problem with unexpected signals from button_request.
         self.button_request.pressed.connect(self.readHoldingRegisters)
+        # FIXME: maybe create an object other than Dialog ?!
 
-        # self.checkBox_Connected.clicked.connect(self.connectToServer) #TODO: figure out
+        """ Check boxes
+        """
+        self.checkBox_Connected.stateChanged.connect(self.connectToServer) #TODO: figure out
 
+        """Line edits
+        """
         self.lineEdit_IP.setText(self.client.getServerIpAddr())
         self.lineEdit_IP.returnPressed.connect(self.setIp)
         self.lineEdit_IP.returnPressed.connect(self.setText)
@@ -44,41 +52,67 @@ class Form(QtGui.QDialog, modBusGui_5.Ui_MainWindow):
         self.lineEdit_regAddr.returnPressed.connect(self.setRegAddr)
         self.lineEdit_regAddr.returnPressed.connect(self.setText)
 
+        """ Spin boxes
+        """
         self.spinBox_numOfReg.setValue(self.client.getAmountReg())
         self.spinBox_numOfReg.valueChanged.connect(self.setAmountOfRegs)
         self.spinBox_numOfReg.valueChanged.connect(self.setText)
 
-        self.radioButton_AutoReq.toggled.connect(self.check_radio_btn)
-        # self.radioButton_AutoReq.toggle.connect(self.b)
+        """ Radio buttons
+        """
+        self.comboBox_ReqMethod.currentIndexChanged.connect(self.check_req_method)
 
-
+        """ Menu functionality
+        """
         self.action_Quit.activated.connect(QtGui.QApplication.exit)
-
         self.action_Anounce.activated.connect(self.anounce)
+        self.action_About.activated.connect(self.about)
 
+        """ Status Bar
+        """
+        self.statusLabel = QtGui.QLabel()
+        self.progressBar = QtGui.QProgressBar()
+        self.myStatusBar = QtGui.QStatusBar()
+        self.myStatusBar.addWidget(self.statusLabel, 1)
+        self.myStatusBar.addWidget(self.progressBar, 2)
+        # self.myStatusBar.showMessage('Ready', 2000)
+        self.setStatusBar(self.myStatusBar)
+        # self.showProgress(100)
+
+
+        """ Show
+        """
         self.show()
 
-    def check_radio_btn(self):
-        if self.radioButton_AutoReq.isChecked():
-            print ("Automatic requests")
-        elif self.radioButton_ManReq.isChecked():
-            print ("Manual requests")
 
+    def showProgress(self, progress):
+        """ Method to show progress
+        """
+        self.progressBar.setValue(progress)
+        if progress == 100:
+            self.statusLabel.setText('Ready')
+            return
 
-        # From https://www.tutorialspoint.com/pyqt/pyqt_qradiobutton_widget.htm:
-        # if b.text() == "Button1":
-        #     if b.isChecked() == True:
-        #         print b.text() + " is selected"
-        #     else:
-        #         print b.text() + " is deselected"
-        #
-        # if b.text() == "Button2":
-        #     if b.isChecked() == True:
-        #         print b.text() + " is selected"
-        #     else:
-        #         print b.text() + " is deselected"
+    def createStatusBar(self):  #TODO: remove
+        """ Method to create Status Bar
+        """
+        self.myStatusBar = QtGui.QStatusBar()
+        self.myStatusBar.addWidget(self.statusLabel, 1)
+        self.myStatusBar.addWidget(self.progressBar, 2)
+        # self.myStatusBar.showMessage('Ready', 2000)
+        self.setStatusBar(self.myStatusBar)
 
-    def anounce(self):  # TODO: remove this method
+    def check_req_method(self):
+        """ Action slot
+        """
+        if self.comboBox_ReqMethod.currentIndex() == 0:
+            print(self.comboBox_ReqMethod.currentIndex())
+        elif self.comboBox_ReqMethod.currentIndex() == 1:
+            print(self.comboBox_ReqMethod.currentIndex())
+
+    def anounce(self):
+        """ Action slot
+        """
         self.textBrowser.clear()
         self.textBrowser.append("IP Address:  " + self.client.getServerIpAddr())
         self.textBrowser.append("Port:  " + self.client.getPort())
@@ -86,39 +120,64 @@ class Form(QtGui.QDialog, modBusGui_5.Ui_MainWindow):
         self.textBrowser.append("Amount of Registers:  " + str(self.client.getAmountReg()))
         self.textBrowser.append("-----------")
 
+    def about(self):
+        """ Action slot
+        """
+        self.textBrowser.clear()
+        self.textBrowser.append("Author: Davor Afric")
+        self.textBrowser.append("Version: 0.6")
+        self.textBrowser.append("Created: November 2016")
+        self.textBrowser.append("-----------")
+
     def setIp(self):
+        """ Action slot
+        """
         self.client.setServerIpAddr(unicode(self.lineEdit_IP.text()))
 
     def setPort(self):
+        """ Action slot
+        """
         self.client.setPort(self.lineEdit_port.text())
 
     def setRegAddr(self):
+        """ Action slot
+        """
         self.client.setRegisterStartAddr(self.lineEdit_regAddr.text())
 
     def setAmountOfRegs(self):
+        """ Action slot
+        """
         self.client.setAmountReg(self.spinBox_numOfReg.value())
 
     def setText(self):
+        """ Action slot
+        """
         self.lineEdit_IP.setText(self.client.getServerIpAddr())
         self.lineEdit_port.setText(self.client.getPort())
         self.lineEdit_regAddr.setText(self.client.getRegisterStartAddr())
         self.spinBox_numOfReg.setValue(self.client.getAmountReg())
 
     def connectToServer(self):
-        self.client.connectServer()
+        """ Action slot
+        """
+        if self.checkBox_Connected.isChecked():
+            self.client.connectServer()
+        else:
+            self.client.disconnectServer()
 
     def readHoldingRegisters(self):
-        self.client.connectServer()
+        """ Action slot
+        """
         self.regResponse = self.client.readHoldingRegs()
 
         # Print the collected data
-        self.textBrowser.clear()
-        for i in range(len(self.regResponse.registers)):
-            self.textBrowser.append("r%s: " % str(i) + str(self.regResponse.getRegister(i)))
+        if self.regResponse > 0:
+            self.textBrowser.clear()
+            for i in range(len(self.regResponse.registers)):
+                self.textBrowser.append("r%s: " % str(i) + str(self.regResponse.getRegister(i)))
+        else: print "Nothing to show."
 
-    def about(self):
-        self.textBrowser.clear()
-        self.textBrowser.append("This is a ")
+
 
 class ModbusClient():
 
@@ -133,7 +192,20 @@ class ModbusClient():
 
         :return: VOID
         """
-        self.modbusConn = ModbusTcpClient(host = self.serverIpAddr, port = self.port)
+        try:
+            self.modbusConn = ModbusTcpClient(host = self.serverIpAddr, port = self.port)
+        except Exception:
+            print "Could not connect to a modbus server."
+
+    def disconnectServer(self):
+        """ Disconnect from a modbus TCP server
+
+        :return: VOID
+        """
+        try:
+            self.modbusConn.close()
+        except Exception:
+            print "No connection to close."
 
     def readHoldingRegs(self):
         """ Read the contiguous block of registers of size 'cnt', starting from the address 'addr'
@@ -142,7 +214,15 @@ class ModbusClient():
         :param amountReg: INTEGER
         :return: OBJECT
         """
-        return self.modbusConn.read_holding_registers(self.regStartAddr, self.amountReg)
+        try:
+            self.modbusConn = ModbusTcpClient(host = self.serverIpAddr, port = self.port)
+        except Exception:
+            print "Could not connect to a modbus server."
+
+        try:
+            return self.modbusConn.read_holding_registers(self.regStartAddr, self.amountReg)
+        except Exception:
+            print "Could not read modbus registers."
 
     def setServerIpAddr(self, ipStr):
         """ Sets the IP address of the modbus server to connect to.
@@ -248,6 +328,5 @@ class ModbusClient():
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    form = Form()
-    # form.show()
+    form = Window()
     sys.exit(app.exec_())
