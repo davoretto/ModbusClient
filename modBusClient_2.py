@@ -34,33 +34,19 @@ class Window(QtGui.QMainWindow, modBusGui_6.Ui_MainWindow):
         self.button_request.pressed.connect(self.readHoldingRegisters)
         # FIXME: maybe create an object other than Dialog ?!
 
-        """ Check boxes
-        """
-        self.checkBox_Connected.stateChanged.connect(self.connectToServer) #TODO: figure out
-
         """Line edits
         """
-        self.lineEdit_IP.setText(self.client.getServerIpAddr())
         self.lineEdit_IP.returnPressed.connect(self.setIp)
-        self.lineEdit_IP.returnPressed.connect(self.setText)
-
-        self.lineEdit_port.setText(self.client.getPort())
         self.lineEdit_port.returnPressed.connect(self.setPort)
-        self.lineEdit_port.returnPressed.connect(self.setText)
-
-        self.lineEdit_regAddr.setText(self.client.getRegisterStartAddr())
         self.lineEdit_regAddr.returnPressed.connect(self.setRegAddr)
-        self.lineEdit_regAddr.returnPressed.connect(self.setText)
 
         """ Spin boxes
         """
-        self.spinBox_numOfReg.setValue(self.client.getAmountReg())
         self.spinBox_numOfReg.valueChanged.connect(self.setAmountOfRegs)
-        self.spinBox_numOfReg.valueChanged.connect(self.setText)
 
         """ Radio buttons
         """
-        self.comboBox_ReqMethod.currentIndexChanged.connect(self.check_req_method)
+        self.comboBox_ReqMethod.currentIndexChanged.connect(self.getReqMethod)
 
         """ Menu functionality
         """
@@ -75,13 +61,13 @@ class Window(QtGui.QMainWindow, modBusGui_6.Ui_MainWindow):
         self.myStatusBar = QtGui.QStatusBar()
         self.myStatusBar.addWidget(self.statusLabel, 1)
         self.myStatusBar.addWidget(self.progressBar, 2)
-        # self.myStatusBar.showMessage('Ready', 2000)
         self.setStatusBar(self.myStatusBar)
-        # self.showProgress(100)
+        self.showProgress(100)
 
 
         """ Show
         """
+        self.updateInfo()
         self.show()
 
 
@@ -102,7 +88,7 @@ class Window(QtGui.QMainWindow, modBusGui_6.Ui_MainWindow):
         # self.myStatusBar.showMessage('Ready', 2000)
         self.setStatusBar(self.myStatusBar)
 
-    def check_req_method(self):
+    def getReqMethod(self): # TODO: fill up
         """ Action slot
         """
         if self.comboBox_ReqMethod.currentIndex() == 0:
@@ -133,37 +119,46 @@ class Window(QtGui.QMainWindow, modBusGui_6.Ui_MainWindow):
         """ Action slot
         """
         self.client.setServerIpAddr(unicode(self.lineEdit_IP.text()))
+        self.updateInfo()
 
     def setPort(self):
         """ Action slot
         """
         self.client.setPort(self.lineEdit_port.text())
+        self.updateInfo()
 
     def setRegAddr(self):
         """ Action slot
         """
         self.client.setRegisterStartAddr(self.lineEdit_regAddr.text())
+        self.updateInfo()
 
     def setAmountOfRegs(self):
         """ Action slot
         """
         self.client.setAmountReg(self.spinBox_numOfReg.value())
+        self.updateInfo()
 
-    def setText(self):
+    def updateInfo(self):
         """ Action slot
         """
         self.lineEdit_IP.setText(self.client.getServerIpAddr())
         self.lineEdit_port.setText(self.client.getPort())
         self.lineEdit_regAddr.setText(self.client.getRegisterStartAddr())
         self.spinBox_numOfReg.setValue(self.client.getAmountReg())
+        # self.checkBox_Connected.setChecked(self.client.getConnectionStatus())
 
-    def connectToServer(self):
+
+    def connectToServerToggle(self):
         """ Action slot
         """
         if self.checkBox_Connected.isChecked():
             self.client.connectServer()
-        else:
+        elif (self.checkBox_Connected.isChecked() == False):
             self.client.disconnectServer()
+
+        # self.updateInfo()
+
 
     def readHoldingRegisters(self):
         """ Action slot
@@ -175,9 +170,9 @@ class Window(QtGui.QMainWindow, modBusGui_6.Ui_MainWindow):
             self.textBrowser.clear()
             for i in range(len(self.regResponse.registers)):
                 self.textBrowser.append("r%s: " % str(i) + str(self.regResponse.getRegister(i)))
-        else: print "Nothing to show."
+        # else: print "Nothing to show."    #TODO: remove
 
-
+        self.updateInfo()
 
 class ModbusClient():
 
@@ -194,6 +189,7 @@ class ModbusClient():
         """
         try:
             self.modbusConn = ModbusTcpClient(host = self.serverIpAddr, port = self.port)
+            print "connectServer executed"  #TODO: remove
         except Exception:
             print "Could not connect to a modbus server."
 
@@ -204,8 +200,10 @@ class ModbusClient():
         """
         try:
             self.modbusConn.close()
+            # print "disconnectServer executed" #TODO: remove
         except Exception:
-            print "No connection to close."
+            # print "No connection to close."
+            pass
 
     def readHoldingRegs(self):
         """ Read the contiguous block of registers of size 'cnt', starting from the address 'addr'
@@ -217,12 +215,12 @@ class ModbusClient():
         try:
             self.modbusConn = ModbusTcpClient(host = self.serverIpAddr, port = self.port)
         except Exception:
-            print "Could not connect to a modbus server."
+            print "Exception: Could not connect to a modbus server."
 
         try:
             return self.modbusConn.read_holding_registers(self.regStartAddr, self.amountReg)
         except Exception:
-            print "Could not read modbus registers."
+            print "Exception: Could not read modbus registers."
 
     def setServerIpAddr(self, ipStr):
         """ Sets the IP address of the modbus server to connect to.
@@ -324,6 +322,19 @@ class ModbusClient():
         except Exception, ipValueError:
             # print "error3"
             return False
+
+    # def getConnectionStatus(self):
+    #     print "----- checking..."
+    #     try:
+    #         if (self.modbusConn):
+    #             print "Connected."
+    #             return True
+    #         else:
+    #             print "Not connected."
+    #             return False
+    #     except Exception:
+    #         print "no connection Exception!"
+    #         return False
 
 
 if __name__ == "__main__":

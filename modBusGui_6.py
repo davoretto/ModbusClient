@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'modBusGui_6.ui'
 #
-# Created: Wed Nov  2 15:06:22 2016
+# Created: Wed Nov  2 16:53:03 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -96,9 +96,6 @@ class Ui_MainWindow(object):
         self.button_request = QtGui.QPushButton(self.centralwidget)
         self.button_request.setGeometry(QtCore.QRect(185, 490, 85, 27))
         self.button_request.setObjectName(_fromUtf8("button_request"))
-        self.checkBox_Connected = QtGui.QCheckBox(self.centralwidget)
-        self.checkBox_Connected.setGeometry(QtCore.QRect(10, 490, 88, 22))
-        self.checkBox_Connected.setObjectName(_fromUtf8("checkBox_Connected"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 280, 27))
@@ -137,7 +134,6 @@ class Ui_MainWindow(object):
         self.comboBox_ReqMethod.setItemText(1, _translate("MainWindow", "Automatic", None))
         self.label_numOfReg_2.setText(_translate("MainWindow", "Request method", None))
         self.button_request.setText(_translate("MainWindow", "Request", None))
-        self.checkBox_Connected.setText(_translate("MainWindow", "Connected", None))
         self.menuFile.setTitle(_translate("MainWindow", "&File", None))
         self.menuHelp.setTitle(_translate("MainWindow", "&Help", None))
         self.action_Anounce.setText(_translate("MainWindow", "&Display Current Setup", None))
